@@ -77,8 +77,18 @@ d3.tsv("data.tsv", function(error, data) {
     d.amount = +d.amount;
   });
 
-  x.domain(d3.extent(data, function(d) { return d.date; }));
-  y.domain(d3.extent(data, function(d) { return d.amount; }));
+	var x_ext = d3.extent(data, function(d) { return d.date; });
+	var y_ext = d3.extent(data, function(d) { return d.amount; });
+
+  x.domain(x_ext);
+  y.domain(y_ext);
+
+	function zoomed() {
+	  svg.select(".x.axis").call(xAxis);
+	  svg.select(".y.axis").call(yAxis);
+    svg.selectAll('path.line').attr('d', line);   
+	}
+	
 
   svg.append("g")
       .attr("class", "x axis")
@@ -94,11 +104,19 @@ d3.tsv("data.tsv", function(error, data) {
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Spent ($)");
-
+			
   svg.append("path")
       .datum(data)
       .attr("class", "line")
       .attr("d", line);
+			
+	  var zoom = d3.behavior.zoom()
+			.x(x)
+			.y(y)
+		  .scaleExtent([0.1,10])
+			.on("zoom", zoomed);
+			
+		svg.call(zoom)
 			
 	svg.append("path")
 		  .attr("class","mouseLine")  
